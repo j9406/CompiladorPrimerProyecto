@@ -35,8 +35,8 @@ public class AnalizadorSintactico {
     private static final int OPC_DER = ']';
 
     //Variable
-    private static final int INI_VAR = '<';
-    private static final int FIN_VAR = '>';
+    //private static final int INI_VAR='<';
+    //private static final int FIN_VAR='>';
     private static final int VARIABLE = 600;
 
     private Integer renglon = 1;
@@ -45,16 +45,14 @@ public class AnalizadorSintactico {
 
     private StringTokenizer gettokenizer(String Codigofuente) {
         if (this.tokenaizer == null) {
-            String alfabeto = String.format("%s%s%s%s%s%s%s%s%s",
+            String alfabeto = String.format("%s%s%s%s%s%s%s",
                     (char) FIN_SENT,
                     (char) CONCATENACION,
                     (char) ALTERNACION,
                     (char) CERR_IZQ,
                     (char) CERR_DER,
                     (char) OPC_IZQ,
-                    (char) OPC_DER,
-                    (char) INI_VAR,
-                    (char) FIN_VAR);
+                    (char) OPC_DER);
             this.tokenaizer = new StringTokenizer(Codigofuente.trim(), alfabeto, true);
 
         }
@@ -66,8 +64,8 @@ public class AnalizadorSintactico {
         String currentToken = this.gettokenizer(codigfuente).nextToken();
         if (esVariable(currentToken)) {
             token = new Token(this.renglon, VARIABLE, currentToken);
-        } else if (esDefinicion(currentToken) && currentToken.equals("::=")) {
-            token = new Token(this.renglon,DEFINICION,currentToken);
+        } else if (esDefinicion(currentToken)) {
+            token = new Token(this.renglon, DEFINICION, currentToken);
         } else {
             int simpleToken = currentToken.charAt(0);
             switch (simpleToken) {
@@ -99,14 +97,6 @@ public class AnalizadorSintactico {
                     token = new Token(this.renglon, OPC_DER,
                             String.format("%s", (char) simpleToken));
                     break;
-                case INI_VAR:
-                    token = new Token(this.renglon, INI_VAR,
-                            String.format("%s", (char) simpleToken));
-                    break;
-                case FIN_VAR:
-                    token = new Token(this.renglon, FIN_VAR,
-                            String.format("%s", (char) simpleToken));
-                    break;
                 default:
                     throw new Error("El caracter no esta dentro del alfabeto");
             }
@@ -117,8 +107,21 @@ public class AnalizadorSintactico {
     private static Boolean esVariable(String textoRevisar) {
         Boolean esnumero = true;
         for (int i = 0; i < textoRevisar.length(); i++) {
-            esnumero = esnumero && Character.isAlphabetic(textoRevisar.charAt(i))
-                    || Character.isDigit(textoRevisar.charAt(i));
+            esnumero = esnumero && textoRevisar.charAt(0) == '<';
+            if (i == 1) {
+                System.out.println("valor de i= " + i);
+                esnumero = esnumero && (Character.isAlphabetic(
+                        textoRevisar.charAt(1)));
+            } else if (i >= 2 && i < textoRevisar.length() - 2 && esnumero==true) {
+                System.out.println("valor de i2= " + i);
+                esnumero = esnumero && Character.isAlphabetic(
+                        textoRevisar.charAt(i))
+                        || Character.isDigit(textoRevisar.charAt(i));
+            } else if (i == textoRevisar.length() - 1) {
+                esnumero = esnumero && textoRevisar.charAt(
+                        textoRevisar.length() - 1) == '>';
+            }
+
         }
 
         return esnumero;
@@ -126,15 +129,17 @@ public class AnalizadorSintactico {
 
     private static Boolean esDefinicion(String textoRevisar) {
         Boolean esDefinicion = true;
-        for (int i = 0; i < textoRevisar.length(); i++) {
-            esDefinicion = esDefinicion && Character.isAlphabetic(textoRevisar.charAt(i));
+        for (int i = 0; i < 3; i++) {
+            esDefinicion = esDefinicion && textoRevisar.charAt(0) == ':'
+                    && textoRevisar.charAt(1) == ':'
+                    && textoRevisar.charAt(2) == '=';
         }
-        return esDefinicion = true;
+        return esDefinicion;
     }
 
     public static void main(String[] args) {
         AnalizadorSintactico analizador = new AnalizadorSintactico();
-        while (analizador.gettokenizer("<J500>&|::=").hasMoreTokens()) {
+        while (analizador.gettokenizer("&[<j9990>]&|::=").hasMoreTokens()) {
             Token t = analizador.lex("");
             System.out.println(t);
         }
