@@ -20,7 +20,15 @@ public class Token {
         this.token = token;
         this.lexema = lexema;
     }
-
+    public char siguiente(){
+        if(renglon<lexema.length())
+            return lexema.charAt(renglon++);
+        else return 'f';
+    }
+    
+    public void atras(){
+        renglon--;
+    }
    
     public Integer getLinea() {
         return renglon;
